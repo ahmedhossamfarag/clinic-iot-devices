@@ -7,9 +7,6 @@
 #define ADV_INTERVAL 1600 * 5
 
 
-// Advertise String
-const char advString[] = DEVICE_NAME;
-
 void setup() {
   // 1) Initialize BLE radio
   if (!BLE.begin()) {
@@ -24,7 +21,7 @@ void setup() {
   BLE.setAdvertisingInterval(ADV_INTERVAL);
 
   // 4) Set the advertise data to the device ID.
-  BLE.setManufacturerData(advString, sizeof(advString) - 1);
+  BLE.setAdvertisedServiceUuid(DEVICE_ID);
 
   // 6) Start advertising
   BLE.advertise();
