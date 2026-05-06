@@ -15,12 +15,10 @@
 // BLE SETUP
 // =====================
 
-#define DEVICE_NAME "CLIENT-IOT-BLE"
+#define DEVICE_NAME "CIoT"
 #define DEVICE_ID "a38deac2-1ab2-4d23-8ba4-e68399782297"
 // 160 units * 0.625 ms = 100 milliseconds (advertises 10 times a second).
 #define ADV_INTERVAL 1600 * 1
-
-BLEService uUIDService(DEVICE_ID);
 
 // =====================
 // IMU SETUP
@@ -35,7 +33,7 @@ LSM6DS3 myIMU(I2C_MODE, 0x6A);
 #define SAMPLING_DELAY 20 // ms (50Hz sampling rate)
 #define NUM_SAMPLES 119
 #define NUM_GESTURES 2
-#define DEFULT_GESTURE -1
+#define DEFULT_GESTURE 0
 
 tflite::MicroErrorReporter tflErrorReporter;
 
@@ -54,11 +52,27 @@ int samplesRead = 0;
 
 int lastPrediction = DEFULT_GESTURE;
 
+
+// =====================
+// HELPER FUNCTION TO UPDATE ADVERTISED GESTURE
+// =====================
+
+void setGesture(uint8_t gesture) {
+  uint8_t mfgData[3];
+  mfgData[0] = 0x34;   // company ID LSB
+  mfgData[1] = 0x12;   // company ID MSB
+  mfgData[2] = gesture;    // gesture value (0-255)
+  BLE.setManufacturerData(mfgData, sizeof(mfgData));
+}
+
 // =====================
 // SETUP
 // =====================
 
 void setup() {
+  Serial.begin(9600);
+  while (!Serial);
+
   // 1) Initialize BLE radio
   if (!BLE.begin()) {
     Serial.println("Starting BLE failed!");
@@ -101,20 +115,17 @@ void setup() {
   tflInputTensor = tflInterpreter->input(0);
   tflOutputTensor = tflInterpreter->output(0);
 
-  // 2) Set the device name 
-  BLE.setDeviceName(DEVICE_NAME);
+  // 2) Set the device name
   BLE.setLocalName(DEVICE_NAME);
 
   // 3) Set the advertise interval
   BLE.setAdvertisingInterval(ADV_INTERVAL);
 
   // 4) Set the advertise data to the device ID.
-  BLE.addService(uUIDService);
-  BLE.setAdvertisedService(uUIDService);
+  BLE.setAdvertisedServiceUuid(DEVICE_ID);
 
   // 5) Set the manufacturer data
-  uint8_t data[1] = {DEFULT_GESTURE};
-  BLE.setManufacturerData(data, 1);
+  setGesture(DEFULT_GESTURE);
 
   // 6) Start advertising
   BLE.advertise();
@@ -190,10 +201,7 @@ void loop() {
   
   if (bestIndex != lastPrediction) {
     BLE.stopAdvertise(); // Stop advertising to update the data
-    // Create a manufacturer data buffer: [bestIndex]
-    uint8_t manufacturerData[1] = {(uint8_t)bestIndex};
-    // Update the advertisement data to include the prediction result
-    BLE.setManufacturerData(manufacturerData, 1);
+    setGesture(bestIndex + 1); // Update the manufacturer data with the new gesture
     BLE.advertise(); // Restart advertising with the updated data
 
     Serial.print("Updated advertised data: ");
