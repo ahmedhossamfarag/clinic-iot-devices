@@ -50,7 +50,7 @@ byte tensorArena[tensorArenaSize] __attribute__((aligned(16)));
 
 int samplesRead = 0;
 
-int lastPrediction = DEFULT_GESTURE;
+int lastPrediction = -1;  // Last index of the predicted gesture (initialized to -1 to indicate no prediction yet)
 
 
 // =====================
