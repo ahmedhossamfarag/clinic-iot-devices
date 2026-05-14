@@ -2,7 +2,7 @@
 #include <ArduinoBLE.h>    // 🛠 Core BLE library for radio control
 
 #define DEVICE_NAME "CLIENT-IOT-BLE"
-#define DEVICE_ID "a38deac2-1ab2-4d23-8ba4-e68399782297"
+#define SERVICE_ID "a38deac2-1ab2-4d23-8ba4-e68399782297"
 // 160 units * 0.625 ms = 100 milliseconds (advertises 10 times a second).
 #define ADV_INTERVAL 1600 * 1
 
@@ -20,8 +20,8 @@ void setup() {
   // 3) Set the advertise interval
   BLE.setAdvertisingInterval(ADV_INTERVAL);
 
-  // 4) Set the advertise data to the device ID.
-  BLE.setAdvertisedServiceUuid(DEVICE_ID);
+  // 4) Set the advertise data to the service ID.
+  BLE.setAdvertisedServiceUuid(SERVICE_ID);
 
   // 6) Start advertising
   BLE.advertise();
