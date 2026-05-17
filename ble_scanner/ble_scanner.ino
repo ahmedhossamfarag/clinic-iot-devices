@@ -1,9 +1,10 @@
 #include <ArduinoBLE.h>
 
 #define DEVICE_NAME "CLIENT-IOT-BLE"
-#define SERVICE_ID  "a38deac2-1ab2-4d23-8ba4-e68399782297"
+#define SERVICE_ID "a38deac2-1ab2-4d23-8ba4-e68399782297"
 
-#define RESTART_INTERVAL 5000
+#define MIN_RSSI -60
+#define RESTART_INTERVAL 3000
 
 unsigned long lastSeen = 0;
 
@@ -12,14 +13,16 @@ void setup()
     // 1) Configure Serial
     Serial.begin(115200);
 
-    while (!Serial);
+    while (!Serial)
+        ;
 
     // 2) Initialize BLE
 
     if (!BLE.begin())
     {
         Serial.println("BLE start failed");
-        while (1);
+        while (1)
+            ;
     }
 
     // 3) Start scanning
@@ -42,11 +45,14 @@ void loop()
         {
             lastSeen = millis();
 
-            Serial.print("{\"mac\":\"");
-            Serial.print(peripheral.address());
-            Serial.print("\",\"rssi\":");
-            Serial.print(peripheral.rssi());
-            Serial.println("}");
+            if (peripheral.rssi() >= MIN_RSSI)
+            {
+                Serial.print("{\"mac\":\"");
+                Serial.print(peripheral.address());
+                Serial.print("\",\"rssi\":");
+                Serial.print(peripheral.rssi());
+                Serial.println("}");
+            }
         }
     }
 
@@ -57,7 +63,6 @@ void loop()
         delay(100);
         BLE.scan(true);
 
-        Serial.println("Restarting scan...");
         lastSeen = millis();
     }
 }

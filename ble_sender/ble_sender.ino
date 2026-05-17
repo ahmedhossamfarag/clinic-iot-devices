@@ -4,7 +4,7 @@
 #define DEVICE_NAME "CLIENT-IOT-BLE"
 #define SERVICE_ID "a38deac2-1ab2-4d23-8ba4-e68399782297"
 // 160 units * 0.625 ms = 100 milliseconds (advertises 10 times a second).
-#define ADV_INTERVAL 160 * 1
+#define ADV_INTERVAL 160 * 2
 
 
 void setup() {
